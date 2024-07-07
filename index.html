@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カウントダウン生成ツール</title>
+    <link rel="stylesheet" href="./css/style.css?date=20240706">
+</head>
+<body>
+    <div class="container">
+        <h2>カウントダウン生成ツール</h2>
+        <form id="countdownForm" method="POST" action="generate.php">
+            <label for="endDate">終了日を選択してください:</label>
+            <input type="date" id="endDate" name="endDate" required>
+            <label for="endTime">終了時間を選択してください:</label>
+            <input type="time" id="endTime" name="endTime" required>
+            <div class="toggle-container">
+                <label for="background">黒の背景を追加</label>
+                <label class="switch">
+                    <input type="checkbox" id="background" name="background">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <input type="submit" value="URLを生成">
+        </form>
+        <div class="link-container" id="linkContainer"></div>
+    </div>
+    <script>
+        document.getElementById('countdownForm').onsubmit = function(event) {
+            event.preventDefault();
+            const endDate = document.getElementById('endDate').value;
+            const endTime = document.getElementById('endTime').value;
+            const background = document.getElementById('background').checked;
+            if (endDate && endTime) {
+                fetch('generate.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'endDate=' + encodeURIComponent(endDate) + '&endTime=' + encodeURIComponent(endTime) + '&background=' + (background ? 'true' : 'false')
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const linkContainer = document.getElementById('linkContainer');
+                    linkContainer.innerHTML = '<p>URL: <a href="' + data.url + '" target="_blank" style="color: blue;">' + data.url + '</a></p>';
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+            } else {
+                console.error('End date and time are required');
+            }
+        };
+    </script>
+</body>
+</html>
